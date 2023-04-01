@@ -19,7 +19,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+AUTH_USER_MODEL = 'talentsport_app.User'
 # Application definition
 
 INSTALLED_APPS = [
@@ -138,5 +138,5 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
-LOGIN_URL = 'rest_framework:login'
-LOGOUT_URL = 'rest_framework:logout'
+#LOGIN_URL = 'rest_framework:login'
+#LOGOUT_URL = 'rest_framework:logout'
