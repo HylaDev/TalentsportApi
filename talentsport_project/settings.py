@@ -138,5 +138,5 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
-#LOGIN_URL = 'rest_framework:login'
-#LOGOUT_URL = 'rest_framework:logout'
+LOGIN_URL = 'rest_framework:login'
+LOGOUT_URL = 'rest_framework:logout'
