@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import PermissionsMixin
+from django.contrib.auth.models import PermissionsMixin,Group
 from django.contrib.auth.base_user import AbstractBaseUser,BaseUserManager
 from django.utils import timezone
 
@@ -37,8 +37,8 @@ class UserManager(BaseUserManager):
     """
     def create_user(self, email,first_name,last_name,phone,city,
                     date_of_born,adress,weight,height,current_club,club_history,
-                    profil_pic,sex,level,strong_foot,discipline_sportive,position
-                    ,password, **extra_fields):
+                    profil_pic,sex,level,strong_foot,discipline_sportive,position,
+                    joined_date,groups,password, **extra_fields):
         """
         Create and save a user.
         """
@@ -51,7 +51,7 @@ class UserManager(BaseUserManager):
                          adress=adress,weight=weight,height=height,
                          current_club=current_club,club_history=club_history,
                          profil_pic=profil_pic,sex=sex,level=level,strong_foot=strong_foot,
-                         discipline_sportive=discipline_sportive,position=position
+                         discipline_sportive=discipline_sportive,position=position,joined_date=joined_date,groups=groups
                          ,**extra_fields)
         user.set_password(password)
         user.save()
@@ -86,7 +86,6 @@ class User(AbstractBaseUser,PermissionsMixin):
     current_club = models.TextField(_('Club Actuel'),blank=True,null=True)
     club_history = models.TextField(_('Historique de club'),blank=True,null=True)
     profil_pic = models.ImageField(_('Profil'),upload_to='images/profil_pic%Y/%m/%d',blank=True,null=True)
-
     class Sex(models.TextChoices):
         F = 'F', _('Féminin')
         M = 'M', _('Masculin')
@@ -106,8 +105,9 @@ class User(AbstractBaseUser,PermissionsMixin):
     strong_foot = models.CharField(_('Pied Fort'),max_length=15, blank=False, null=False, choices=Strong_foot.choices)
     discipline_sportive = models.ForeignKey(DisciplineSportive, on_delete=models.SET_NULL, verbose_name='Discipline Sportive', null=True, blank=False)
     position = models.ForeignKey(PlayerPosition, on_delete=models.SET_NULL,verbose_name='Poste', null=True, blank=False)
-    joined_date = models.DateTimeField(auto_now_add=True)
-    update_date = models.DateTimeField(auto_now_add=True)
+    groups = models.ForeignKey(Group,on_delete=models.SET_NULL,verbose_name='Groupe',null=True, blank=True)
+    joined_date = models.DateTimeField(null=True, blank=True)
+    update_date = models.DateTimeField(null=True, blank=True)
     is_actif = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)

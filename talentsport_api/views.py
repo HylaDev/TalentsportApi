@@ -38,7 +38,9 @@ class UserController(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Ge
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # User by id controller
-class UserByController(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+class UserByController(mixins.ListModelMixin, 
+                       mixins.UpdateModelMixin, 
+                       generics.GenericAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -53,6 +55,9 @@ class UserByController(mixins.ListModelMixin, mixins.CreateModelMixin, generics.
             })
         serializer = UserSerializer(user, many=False)
         return Response(serializer.data)
+    
+    def put(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
 
 # Categories post controller
 class PostCategoryController(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
