@@ -37,6 +37,23 @@ class UserController(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Ge
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# User by id controller
+class UserByController(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get(self, request, id,*args, **kwargs):
+        """Returns a list of users objects"""
+        try: 
+            user = User.objects.get(id=id, *args, **kwargs)
+        except: 
+            return JsonResponse({
+                'ok':'False',
+                'message':'This user not exist'
+            })
+        serializer = UserSerializer(user, many=False)
+        return Response(serializer.data)
+
 # Categories post controller
 class PostCategoryController(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     """Controller for the PostCategeory model"""

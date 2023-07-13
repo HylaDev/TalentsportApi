@@ -8,6 +8,8 @@ urlpatterns = [
     path('',Overview),
     # Route to view all users
     path('users', views.UserController.as_view()),
+    # Route to view user by id
+    path('users/<int:id>', views.UserByController.as_view()),
     # Route to view all post categories
     path('categories', views.PostCategoryController.as_view()),
     # Route to view all disciplines
