@@ -9,14 +9,83 @@ from rest_framework import mixins,generics,status
 # Overview controller
 @api_view(('GET',))
 def Overview(request):
-    """Returns a list of all categories, posts and disciplines sportives"""
-    over = {
-        'List all categories': 'api/categories',
-        'List all posts': 'api/posts',
-        'List all disciplines sportives': 'api/disciplines',
-        'List all Users': 'api/users',
-    }
-    return Response(over)
+    """Returns all endpoints"""
+    routes = [
+        {
+            'Endpoint':'/users',
+            'Method': 'GET',
+            'Body': None,
+            'Description': 'Returns all register users'
+        },
+        {
+            'Endpoint':'/users',
+            'Method': 'POST',
+            'Body': {'body':""},
+            'Description': 'Create a new user'
+        },
+        {
+            'Endpoint':'/users/:id',
+            'Method': 'GET',
+            'Body': None,
+            'Description': 'Return informations about specified user'
+        },
+        {
+            'Endpoint':'/users/:id',
+            'Method': 'PUT',
+            'Body': {'body':""},
+            'Description': 'Update specified user data'
+        },
+        {
+            'Endpoint':'/posts',
+            'Method': 'GET',
+            'Body': None,
+            'Description': 'Returns all posts'
+        },
+        {
+            'Endpoint':'/posts',
+            'Method': 'POST',
+            'Body': {'body':""},
+            'Description': 'Create a new post'
+        },
+        {
+            'Endpoint':'/posts/:id',
+            'Method': 'GET',
+            'Body': None,
+            'Description': 'Return informations about specified post'
+        },
+        {
+            'Endpoint':'/posts/:id',
+            'Method': 'PUT',
+            'Body': {'body':""},
+            'Description': 'Update specified post data'
+        },
+        {
+            'Endpoint':'/disciplines',
+            'Method': 'GET',
+            'Body': None,
+            'Description': 'Returns all sports disciplines'
+        },
+        {
+            'Endpoint':'/disciplines',
+            'Method': 'POST',
+            'Body': {'body':""},
+            'Description': 'Create a new sport discipline'
+        },
+        {
+            'Endpoint':'/categories',
+            'Method': 'GET',
+            'Body': None,
+            'Description': 'Returns all posts categories'
+        },
+        {
+            'Endpoint':'/categories',
+            'Method': 'POST',
+            'Body': {'body':""},
+            'Description': 'Create a new post category'
+        },
+    ]
+   
+    return Response(routes, status= status.HTTP_200_OK)
 
 # User controller
 class UserController(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
@@ -162,3 +231,25 @@ class DisciplineSportiveController(mixins.ListModelMixin, mixins.CreateModelMixi
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
+
+# Notification controller
+class NotificationsController(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+    """Controller for the Notification model"""
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializers
+
+    """Returns a list of all notifications objects"""
+    def get(self, request, *args, **kwargs):
+        
+        notifications = Notification.objects.all()
+        serializer = NotificationSerializers(notifications, many=True)
+        return Response(serializer.data)
+    
+    """Create a new notification object"""
+    def post(self, request, *args, **kwargs):
+        
+        serializer = NotificationSerializers(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

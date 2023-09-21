@@ -27,7 +27,8 @@ class UserSerializer(serializers.ModelSerializer):
                   'discipline_sportive',
                   'position',
                   'password',
-                  'groups']
+                  'groups',
+                  'followers']
         extra_kwargs = {'password': {'write_only': True},
                         }
 
@@ -53,13 +54,14 @@ class UserSerializer(serializers.ModelSerializer):
         user_grp = validated_data.get('groups')
         user_date = validated_data.get('date_of_born')
         user_joined_date = validated_data.get('joined_date')
+        user_followers = validated_data.get('followers')
         
 
         user = User.objects.create_user(user_email, user_fname, user_lname, user_phone,
                                         user_city, user_date, user_adress, user_weight, user_height, user_current_club,
                                         user_club_history, user_profil_pic, user_sex,user_level, user_strong_foot,
-                                        user_discipline_sportive,user_position,user_joined_date,user_grp,user_pwd)
-
+                                        user_discipline_sportive,user_position,user_joined_date,user_grp,user_followers,user_pwd)
+        user.followers.set(user_followers)
         user.save()
         return user
         
@@ -133,4 +135,9 @@ class DisciplineSportiveSerializers(serializers.ModelSerializer):
     class Meta:
         model = DisciplineSportive
         fields = ['designation','description']
+
+class NotificationSerializers(serializers.ModelSerializer):
+    class Meta:
+        model= Notification
+        fields =['type','send_from','send_to','send_date','comment','post','is_open']
 

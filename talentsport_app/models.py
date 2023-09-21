@@ -38,7 +38,7 @@ class UserManager(BaseUserManager):
     def create_user(self, email,first_name,last_name,phone,city,
                     date_of_born,adress,weight,height,current_club,club_history,
                     profil_pic,sex,level,strong_foot,discipline_sportive,position,
-                    joined_date,groups,password, **extra_fields):
+                    joined_date,groups,followers,password, **extra_fields):
         """
         Create and save a user.
         """
@@ -51,8 +51,7 @@ class UserManager(BaseUserManager):
                          adress=adress,weight=weight,height=height,
                          current_club=current_club,club_history=club_history,
                          profil_pic=profil_pic,sex=sex,level=level,strong_foot=strong_foot,
-                         discipline_sportive=discipline_sportive,position=position,joined_date=joined_date,groups=groups
-                         ,**extra_fields)
+                         discipline_sportive=discipline_sportive,position=position,joined_date=joined_date,groups=groups,**extra_fields)
         user.set_password(password)
         user.save()
         return user
@@ -74,41 +73,43 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser,PermissionsMixin):
     email = models.EmailField(_('Email'), unique=True,null=False, blank=False)
     first_name = models.CharField(
-        _('Prénom'), max_length=30, null=False, blank=False)
+        _('Prénom'), max_length=30, null=True, blank=True)
     last_name = models.CharField(
-        _('Nom'), max_length=30, null=False, blank=False)
-    phone = models.CharField(_('Téléphone'), max_length=30, null=False, blank=False)
-    city = models.CharField(_('Ville'), max_length=30, null=False, blank=False)
-    date_of_born = models.DateField(_('Date de naissance'),blank=False,null=False)
-    adress = models.TextField(_('Adresse'),blank=False,null=False)
-    weight = models.CharField(_('Poids'),max_length=20,blank=False,null=False)
-    height = models.CharField(_('Taille'),max_length=20,blank=False,null=False)
+        _('Nom'), max_length=30, null=True, blank=True)
+    phone = models.CharField(_('Téléphone'), max_length=30, null=True, blank=True)
+    country = models.CharField(_('Country'), max_length=50, null=True, blank=True)
+    city = models.CharField(_('Ville'), max_length=30, null=True, blank=True)
+    date_of_born = models.DateField(_('Date de naissance'),blank=True,null=True)
+    adress = models.TextField(_('Adresse'),blank=True,null=True)
+    weight = models.CharField(_('Poids'),max_length=20,blank=True,null=True)
+    height = models.CharField(_('Taille'),max_length=20,blank=True,null=True)
     current_club = models.TextField(_('Club Actuel'),blank=True,null=True)
     club_history = models.TextField(_('Historique de club'),blank=True,null=True)
     profil_pic = models.ImageField(_('Profil'),upload_to='images/profil_pic%Y/%m/%d',blank=True,null=True)
+    followers = models.ManyToManyField('self',symmetrical=False, blank=True, verbose_name='Abonnés') 
     class Sex(models.TextChoices):
         F = 'F', _('Féminin')
         M = 'M', _('Masculin')
-    sex = models.CharField(_('Sexe'),max_length=15, blank=False, null=False, choices=Sex.choices)
+    sex = models.CharField(_('Sexe'),max_length=15, blank=True, null=True, choices=Sex.choices)
 
     class Level(models.TextChoices):
         DEBUTANT = 'DEBUTANT', _('Débutant')
         INTERMEDIAIRE = 'INTERMEDIAIRE', _('Intermédiaire')
         PASSIONNER = 'PASSIONNER', _('Passioner')
         PROFESSIONNEL = 'PROFESSIONNEL', _('Professionnel')
-    level = models.CharField(_('Niveau'),max_length=15, blank=False, null=False, choices=Level.choices)
+    level = models.CharField(_('Niveau'),max_length=15, blank=True, null=True, choices=Level.choices)
 
     class Strong_foot(models.TextChoices):
         GAUCHE = 'GAUCHE', _('Gauche')
         DROIT = 'DROIT', _('Droit')
 
-    strong_foot = models.CharField(_('Pied Fort'),max_length=15, blank=False, null=False, choices=Strong_foot.choices)
+    strong_foot = models.CharField(_('Pied Fort'),max_length=15, blank=True, null=True, choices=Strong_foot.choices)
     discipline_sportive = models.ForeignKey(DisciplineSportive, on_delete=models.SET_NULL, verbose_name='Discipline Sportive', null=True, blank=False)
     position = models.ForeignKey(PlayerPosition, on_delete=models.SET_NULL,verbose_name='Poste', null=True, blank=False)
     groups = models.ForeignKey(Group,on_delete=models.SET_NULL,verbose_name='Groupe',null=True, blank=True)
     joined_date = models.DateTimeField(null=True, blank=True)
     update_date = models.DateTimeField(null=True, blank=True)
-    is_actif = models.BooleanField(default=True)
+    is_actif = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
     
@@ -120,8 +121,6 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     def __str__(self):
         return self.email  
-
-
 
 #Publications models
 """
@@ -152,3 +151,37 @@ class Posts(models.Model):
 
     def __str__(self):
      return self.text
+
+class Comment(models.Model):
+	author = models.ForeignKey(User, on_delete=models.CASCADE)
+	post = models.ForeignKey(Posts, on_delete = models.CASCADE, null=True)
+	comment_date = models.DateTimeField(auto_now_add=True)
+	comment = models.TextField()
+	likes = models.ManyToManyField(User, related_name='commentaire_like', blank=True)
+	parent = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True, related_name="+")
+
+	@property
+	def children(self):
+		return Comment.objects.filter(parent=self).order_by('-comment_date').all()
+
+
+	@property
+	def is_parent(self):
+		if self.parent is None:
+			return True
+		return False
+
+
+"""
+This model stores the different notifications 
+"""
+class Notification(models.Model):
+    # 1 = Like 2 = comment  3 = Followers
+	type = models.IntegerField()
+	send_from = models.ForeignKey(User, on_delete = models.CASCADE, null=True,blank=True, related_name="Expéditeur")
+	send_to = models.ForeignKey(User, on_delete = models.CASCADE, null=True,blank=True, related_name="Destinataire") 
+	post = models.ForeignKey(Posts, on_delete = models.CASCADE,blank=True, null=True, related_name="+")
+	comment = models.ForeignKey(Comment, on_delete = models.CASCADE,blank=True, null = True, related_name="+")
+	send_date = models.DateTimeField(auto_now_add=True)
+	is_open = models.BooleanField(default=False)
+    

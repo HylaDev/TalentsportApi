@@ -1,3 +1,6 @@
 djangorestframework==3.14.0
 django-filter
 markdown==3.4.1
+python-dotenv
+psycopg2==2.9.7
+ django-cors-headers==4.2.0 
