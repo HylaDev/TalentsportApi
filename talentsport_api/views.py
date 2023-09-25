@@ -83,6 +83,18 @@ def Overview(request):
             'Body': {'body':""},
             'Description': 'Create a new post category'
         },
+        {
+            'Endpoint':'/notifications',
+            'Method': 'GET',
+            'Body': None,
+            'Description': 'Returns all notifications'
+        },
+        {
+            'Endpoint':'/notifications',
+            'Method': 'POST',
+            'Body': {'body':""},
+            'Description': 'Create a new notification object'
+        },
     ]
    
     return Response(routes, status= status.HTTP_200_OK)
@@ -112,6 +124,7 @@ class UserByController(mixins.ListModelMixin,
                        generics.GenericAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    lookup_field = 'id'
 
     def get(self, request, id,*args, **kwargs):
         """Returns a list of users objects"""
@@ -253,3 +266,36 @@ class NotificationsController(mixins.ListModelMixin, mixins.CreateModelMixin, ge
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# Notification By id Controller
+class NotificationByIdController(
+    mixins.ListModelMixin, 
+    mixins.CreateModelMixin, 
+    generics.GenericAPIView,
+    mixins.DestroyModelMixin):
+    """Controller for the notification model"""
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializers
+
+    def get(self, request, id,*args, **kwargs):
+        """Returns a list of all notification by id objects"""
+        try: 
+            notification = Notification.objects.get(id=id)
+        except:
+            return JsonResponse({
+                'ok':'False',
+                'message':'This notification not exist'
+            })
+        serializer = NotificationSerializers(notification, many=False)
+        return Response(serializer.data)
+    
+    def delete(self, request, id, format=None):
+        """Check if notification exists"""
+        try: 
+            notification = Notification.objects.get(id=id)
+        except:
+            return JsonResponse({
+                'ok':'False',
+                'message':'This notification not exist'
+            })
+        notification.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

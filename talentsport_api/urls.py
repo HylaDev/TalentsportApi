@@ -25,4 +25,5 @@ urlpatterns = [
 
     # Route to view all notifications
     path('notifications', views.NotificationsController.as_view()),
+    path('notifications/<int:id>', views.NotificationByIdController.as_view()),
 ]
