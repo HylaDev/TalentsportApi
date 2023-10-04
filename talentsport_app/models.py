@@ -151,6 +151,19 @@ class Posts(models.Model):
 
     def __str__(self):
      return self.text
+    
+
+class Challenges(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,verbose_name="Utilisateur")
+    discipline_sportive = models.ForeignKey(DisciplineSportive, on_delete=models.CASCADE, null=False, blank=False,verbose_name="Discipline Sportive")	
+    date = models.DateTimeField(auto_now_add=True)
+    images = models.ImageField(_('Photos'),upload_to="images/%Y/%m/%d",null=True, blank=True)
+    is_valid = models.BooleanField(_('Valide'),default=False, null=True, blank = True)
+    videos = models.FileField(_('Vidéos'),upload_to="videos/%Y/%m/%d", null=True, blank=True)
+    likes = models.ManyToManyField(User, blank=True, related_name= 'chanllenge_like')
+    update_date = models.DateTimeField(_('Date mise à jour'),default=timezone.now,blank=True, null=True)
+	
+
 
 class Comment(models.Model):
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
